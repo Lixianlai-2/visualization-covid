@@ -11,24 +11,38 @@ import backgroundImg from "./assets/背景图片.jpg";
 import { useStore } from "./store";
 import { onMounted } from "vue";
 import * as echarts from "echarts";
+// 引入中国地图的echarts数据
 import "../src/assets/china";
-
+// 引入省份的经纬度数据
+import { geoCoordMap } from "../src/assets/geoMap";
+// 得到store中的内容
 const store = useStore();
 
 onMounted(async () => {
+  // 发送异步请求
   await store.getList();
-  console.log(store.list.diseaseh5Shelf.areaTree[0].children);
+  initEcharts();
+});
+
+// 把业务逻辑封装在initEcharts里面
+const initEcharts = function () {
+  const provinces = store.list.diseaseh5Shelf.areaTree[0].children;
+  // console.log(provinces);
+
   // 基于准备好的dom，初始化echarts实例
   const charts = echarts.init(document.querySelector("#china") as HTMLElement);
-  var data = [
-    {
-      name: "内蒙古",
-      itemStyle: {
-        areaColor: "#56b1da",
-      },
-      value: [110.3467, 41.4899],
-    },
-  ];
+
+  var data = provinces.map((p) => {
+    return {
+      name: p.name,
+      // 通过省份名，得到经纬度，然后加入当前确诊信息
+      value: geoCoordMap[p.name].concat(p.total.nowConfirm),
+      children: p.children,
+    };
+  });
+
+  console.log(data[0].children);
+
   // 绘制图表
   charts.setOption({
     backgroundColor: "black",
@@ -47,21 +61,24 @@ onMounted(async () => {
           colorStops: [
             {
               offset: 0,
+
               color: "#152E6E", // 0% 处的颜色
             },
             {
               offset: 1,
+
               color: "#0673AD", // 50% 处的颜色
             },
           ],
           global: true, // 缺省为 false
         },
-        shadowColor: "#0f5d9d",
+        // shadowColor: "#0f5d9d",
         shadowOffsetX: 0,
-        shadowOffsetY: 15,
-        opacity: 0.5,
+        // shadowOffsetY: 15,
+        opacity: 0,
       },
       emphasis: {
+        // areaColor: "red",
         areaColor: "#0f5d9d",
       },
 
@@ -90,7 +107,6 @@ onMounted(async () => {
     series: [
       {
         type: "map",
-        selectedMode: "multiple",
         map: "china",
         aspectScale: 0.75,
         // aspectScale: 8,
@@ -106,17 +122,22 @@ onMounted(async () => {
         label: {
           // 是否显示省份
           show: true,
-          color: "#FFFFFF",
-          // 省份问题大小
+          // 省份字体颜色
+          color: "white",
+          // color: "#FFFFFF",
+          // 省份字体大小
           fontSize: 14,
         },
         itemStyle: {
+          // areaColor: "red",
+          // 地图颜色
           areaColor: "#0c3653",
           borderColor: "#1cccff",
           // 省份边界
           borderWidth: 1,
         },
         emphasis: {
+          // areaColor: "red",
           areaColor: "#56b1da",
           label: {
             // show: true,
@@ -135,6 +156,10 @@ onMounted(async () => {
         label: {
           // 是否显示坐标
           show: true,
+          formatter(value: any) {
+            // 展示目前确诊信息
+            return value.data.value[2];
+          },
         },
         itemStyle: {
           // color: "#D8BC37", //标志颜色
@@ -151,13 +176,13 @@ onMounted(async () => {
         },
         zlevel: 1,
         symbol: "pin",
-        symbolSize: [45, 45],
-        // symbolSize: [27, 30],
+        // symbolSize: [100, 100],
+        symbolSize: [30, 30],
         symbolOffset: [0, "-10%"],
       },
     ],
   });
-});
+};
 </script>
 
 <style lang="less">
