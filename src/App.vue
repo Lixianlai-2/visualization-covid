@@ -14,9 +14,10 @@ import * as echarts from "echarts";
 import "../src/assets/china";
 
 const store = useStore();
-store.getList();
 
-onMounted(() => {
+onMounted(async () => {
+  await store.getList();
+  console.log(store.list.diseaseh5Shelf.areaTree[0].children);
   // 基于准备好的dom，初始化echarts实例
   const charts = echarts.init(document.querySelector("#china") as HTMLElement);
   var data = [
