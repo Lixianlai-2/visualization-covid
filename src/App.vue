@@ -1,8 +1,32 @@
 <template>
-  <div class="box" :style="{ background: `url(${backgroundImg})` }">
+  <div
+    class="box"
+    :style="{ background: `url(${backgroundImg}) center center` }"
+  >
     <div class="box-left"></div>
     <div class="box-center" id="china"></div>
-    <div class="box-right"></div>
+    <div class="box-right" style="color: aliceblue">
+      <table class="table" border="1">
+        <thead>
+          <tr>
+            <th>地区</th>
+            <th>新增确诊</th>
+            <th>累计确诊</th>
+            <th>治愈</th>
+            <th>死亡</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in store.item" :key="item.name">
+            <td>{{ item.name }}</td>
+            <td>{{ item.today.confirm }}</td>
+            <td>{{ item.total.confirm }}</td>
+            <td>{{ item.total.heal }}</td>
+            <td>{{ item.total.dead }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -21,12 +45,15 @@ const store = useStore();
 onMounted(async () => {
   // 发送异步请求
   await store.getList();
+
   initEcharts();
 });
 
 // 把业务逻辑封装在initEcharts里面
 const initEcharts = function () {
   const provinces = store.list.diseaseh5Shelf.areaTree[0].children;
+  console.log(provinces);
+  store.item = provinces[3].children;
   // console.log(provinces);
 
   // 基于准备好的dom，初始化echarts实例
@@ -41,11 +68,10 @@ const initEcharts = function () {
     };
   });
 
-  console.log(data[0].children);
-
   // 绘制图表
   charts.setOption({
-    backgroundColor: "black",
+    // 删除图片的背景颜色
+    // backgroundColor: "black",
     geo: {
       map: "china",
       aspectScale: 0.8,
@@ -182,6 +208,11 @@ const initEcharts = function () {
       },
     ],
   });
+
+  charts.on("click", (e: any) => {
+    store.item = e.data.children;
+    console.log(store.item);
+  });
 };
 </script>
 
@@ -203,7 +234,7 @@ body,
   // border: 3px solid blue;
   display: flex;
   &-left {
-    width: 100px;
+    width: 400px;
     // background: red;
   }
   &-center {
@@ -211,8 +242,29 @@ body,
     flex: 1;
   }
   &-right {
-    width: 100px;
+    width: 400px;
+    overflow: auto;
     // background: blue;
+  }
+}
+
+.table {
+  margin-top: 20px;
+  font-size: 10px;
+  width: 97%;
+  background: #232323;
+
+  tr {
+    th {
+      padding: 5px;
+      white-space: nowrap;
+    }
+    td {
+      padding: 5px 10px;
+      width: 100px;
+      white-space: nowrap;
+      text-align: center;
+    }
   }
 }
 </style>
