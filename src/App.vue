@@ -3,10 +3,43 @@
     class="box"
     :style="{ background: `url(${backgroundImg}) center center` }"
   >
-    <div class="box-left"></div>
+    <div class="box-left">
+      <div class="box-left-card">
+        <section>
+          <div>较上日 + {{ store.chinaAdd.localConfirmH5 }}</div>
+          <div>{{ store.chinaTotal.localConfirm }}</div>
+          <div>本地现有确诊</div>
+        </section>
+        <section>
+          <div>较上日 + {{ store.chinaAdd.nowConfirm }}</div>
+          <div>{{ store.chinaTotal.nowConfirm }}</div>
+          <div>现有确诊</div>
+        </section>
+        <section>
+          <div>较上日 + {{ store.chinaAdd.confirm }}</div>
+          <div>{{ store.chinaTotal.confirm }}</div>
+          <div>累计确诊</div>
+        </section>
+        <section>
+          <div>较上日 + {{ store.chinaAdd.noInfect }}</div>
+          <div>{{ store.chinaTotal.noInfect }}</div>
+          <div>无症状感染者</div>
+        </section>
+        <section>
+          <div>较上日 + {{ store.chinaAdd.importedCase }}</div>
+          <div>{{ store.chinaTotal.importedCase }}</div>
+          <div>境外输入</div>
+        </section>
+        <section>
+          <div>较上日 + {{ store.chinaAdd.dead }}</div>
+          <div>{{ store.chinaTotal.dead }}</div>
+          <div>累计死亡</div>
+        </section>
+      </div>
+    </div>
     <div class="box-center" id="china"></div>
     <div class="box-right" style="color: aliceblue">
-      <table class="table" border="1">
+      <table class="table styled-table" border="1">
         <thead>
           <tr>
             <th>地区</th>
@@ -52,9 +85,9 @@ onMounted(async () => {
 // 把业务逻辑封装在initEcharts里面
 const initEcharts = function () {
   const provinces = store.list.diseaseh5Shelf.areaTree[0].children;
-  console.log(provinces);
+  console.log(store.list);
+  // 默认展示的四川数据
   store.item = provinces[3].children;
-  // console.log(provinces);
 
   // 基于准备好的dom，初始化echarts实例
   const charts = echarts.init(document.querySelector("#china") as HTMLElement);
@@ -217,6 +250,10 @@ const initEcharts = function () {
 </script>
 
 <style lang="less">
+@itemBorder: #22334d;
+@itemBg: #1e3655;
+@itemColor: #4f8bc0;
+
 * {
   padding: 0;
   margin: 0;
@@ -234,8 +271,35 @@ body,
   // border: 3px solid blue;
   display: flex;
   &-left {
+    // width: 90%;
     width: 400px;
-    // background: red;
+    &-card {
+      margin-top: 25px;
+      margin-left: 10px;
+      width: 95%;
+      display: grid;
+      grid-template-rows: auto auto;
+      grid-template-columns: auto auto auto;
+      section {
+        background: @itemBg;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #352834;
+        div {
+          color: #96a7b7;
+          font-size: 14px;
+        }
+        div:nth-child(2) {
+          font-size: 20px;
+          font-weight: bold;
+          padding: 5px;
+          color: @itemColor;
+        }
+      }
+    }
   }
   &-center {
     // 中间的内容撑满
@@ -244,15 +308,21 @@ body,
   &-right {
     width: 400px;
     overflow: auto;
+    margin-left: 5px;
     // background: blue;
   }
 }
 
 .table {
-  margin-top: 20px;
-  font-size: 10px;
+  font-size: 12px;
   width: 97%;
-  background: #232323;
+  background: #38536e;
+  border-collapse: collapse;
+  // border: none;
+  margin: 25px 0;
+  font-size: 0.9em;
+  font-family: sans-serif;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 
   tr {
     th {
