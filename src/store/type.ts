@@ -67,7 +67,6 @@ export interface Today {
   confirm: number;
   confirmCuts: number;
   isUpdated: boolean;
-  wzz_add: string;
   local_confirm_add: number;
 }
 
