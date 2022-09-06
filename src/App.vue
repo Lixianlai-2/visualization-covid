@@ -36,8 +36,10 @@
           <div>累计死亡</div>
         </section>
       </div>
+      <div class="box-left-pie"></div>
+      <div class="box-left-line"></div>
     </div>
-    <div class="box-center" id="china"></div>
+    <div class="box-center" id="china" style="height=400px; width:300px"></div>
     <div class="box-right" style="color: aliceblue">
       <table class="table styled-table" border="1">
         <thead>
@@ -78,8 +80,9 @@ const store = useStore();
 onMounted(async () => {
   // 发送异步请求
   await store.getList();
-
+  initPie();
   initEcharts();
+  initLine();
 });
 
 // 把业务逻辑封装在initEcharts里面
@@ -88,6 +91,8 @@ const initEcharts = function () {
   console.log(store.list);
   // 默认展示的四川数据
   store.item = provinces[3].children;
+
+  let china = document.querySelector("#id");
 
   // 基于准备好的dom，初始化echarts实例
   const charts = echarts.init(document.querySelector("#china") as HTMLElement);
@@ -155,7 +160,7 @@ const initEcharts = function () {
             },
           },
           label: {
-            show: true,
+            // show: false,
             // show: false,
             color: "#FFFFFF",
             fontSize: 12,
@@ -214,7 +219,7 @@ const initEcharts = function () {
         // symbolOffset:[0, '-40%'] ,
         label: {
           // 是否显示坐标
-          show: true,
+          show: false,
           formatter(value: any) {
             // 展示目前确诊信息
             return value.data.value[2];
@@ -231,12 +236,12 @@ const initEcharts = function () {
           brushType: "stroke",
         },
         emphasis: {
-          scale: true,
+          scale: false,
         },
         zlevel: 1,
         symbol: "pin",
         // symbolSize: [100, 100],
-        symbolSize: [30, 30],
+        symbolSize: [0, 0],
         symbolOffset: [0, "-10%"],
       },
     ],
@@ -244,7 +249,96 @@ const initEcharts = function () {
 
   charts.on("click", (e: any) => {
     store.item = e.data.children;
-    console.log(store.item);
+  });
+};
+
+const initPie = function () {
+  const pie = echarts.init(
+    document.querySelector(".box-left-pie") as HTMLElement
+  );
+
+  pie.setOption({
+    tooltip: {
+      trigger: "item",
+    },
+    legend: {
+      top: "0%",
+      left: "center",
+    },
+    series: [
+      {
+        name: "今日确诊",
+        type: "pie",
+        radius: ["40%", "70%"],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: "#fff",
+          borderWidth: 2,
+        },
+        label: {
+          show: false,
+          position: "center",
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: "40",
+            fontWeight: "bold",
+          },
+        },
+        labelLine: {
+          show: false,
+        },
+        data: store.cityDetail.map((c) => {
+          return {
+            name: c.city,
+            value: c.local_confirm_add,
+          };
+        }),
+      },
+    ],
+  });
+};
+
+const initLine = function () {
+  const line = echarts.init(
+    document.querySelector(".box-left-line") as HTMLElement
+  );
+
+  line.setOption({
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: store.cityDetail.map((c) => c.city),
+      axisLine: {
+        lineStyle: {
+          // 折线图横坐标的颜色
+          color: "white",
+        },
+      },
+    },
+    label: {
+      // show: true,
+    },
+    yAxis: {
+      type: "value",
+      axisLine: {
+        lineStyle: {
+          color: "white",
+        },
+      },
+    },
+    series: [
+      {
+        data: store.cityDetail.map((c) => c.local_confirm_add),
+        type: "line",
+        areaStyle: {},
+      },
+    ],
+    tooltip: {
+      trigger: "axis",
+    },
   });
 };
 </script>
@@ -266,6 +360,10 @@ body,
   height: 100%;
 }
 
+#china {
+  min-height: 300px;
+}
+
 .box {
   height: 100%;
   // border: 3px solid blue;
@@ -273,6 +371,15 @@ body,
   &-left {
     // width: 90%;
     width: 400px;
+    &-pie {
+      height: 350px;
+      margin-top: 30px;
+    }
+    &-line {
+      height: 320px;
+      margin-top: 20px;
+    }
+
     &-card {
       margin-top: 25px;
       margin-left: 10px;
